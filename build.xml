@@ -1,0 +1,45 @@
+<!--
+	SimpleSerial - A simple serial port library for Java
+	(c) Kristian Klomsten Skordal 2017 <kristian.skordal@wafflemail.net>
+	Report bugs and issues on <https://github.com/skordal/simpleserial/issues>
+-->
+
+<project name="SimpleSerial" default="all">
+
+	<!-- Build properties: -->
+	<property name="src.dir" value="java/" />
+	<property name="build.dir" value="build/" />
+	<property name="native.dir" value="native/" />
+	<property name="lib.dir" value="lib/" />
+
+	<target name="init" description="Sets up the build environment">
+		<tstamp />
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${lib.dir}" />
+	</target>
+
+	<target name="compile" description="Compiles the project" depends="init">
+		<javac srcdir="${src.dir}" destdir="${build.dir}" includeantruntime="false">
+			<compilerarg value="-g" />
+			<compilerarg value="-Xlint" />
+		</javac>
+		<jar destfile="simpleserial.jar" basedir="${build.dir}" />
+		<javah class="net.skordal.simpleserial.SerialPort" classpath="${build.dir}" destdir="${native.dir}" />
+	</target>
+
+	<target name="native" description="Compiles the native (JNI) components of the project" depends="init,compile">
+		<exec executable="make" dir="${native.dir}" />
+	</target>
+
+	<target name="all" description="Runs all compilation steps to produce the finished library." depends="native,compile" />
+
+	<target name="clean" description="Cleans the project folder">
+		<delete dir="${build.dir}" />
+		<delete dir="${lib.dir}" />
+		<exec executable="make" dir="${native.dir}">
+			<arg value="clean" />
+		</exec>
+	</target>
+
+</project>
+
